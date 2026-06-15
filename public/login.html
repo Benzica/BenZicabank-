@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureTrust Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo-section i {
+            font-size: 3rem;
+            color: #4cd137;
+            margin-bottom: 15px;
+        }
+        .logo-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .logo-section p {
+            color: #aaa;
+            margin-top: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4cd137;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #4cd137;
+        }
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .toggle-auth {
+            text-align: center;
+            margin-top: 20px;
+            color: #aaa;
+        }
+        .toggle-auth a {
+            color: #4cd137;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .alert-success {
+            background: #2ecc71;
+            color: white;
+        }
+        .alert-error {
+            background: #e74c3c;
+            color: white;
+        }
+        .form-section {
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #4cd137;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <i class="fas fa-university"></i>
+            <h1>SecureTrust</h1>
+            <p>Online Banking</p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="form-section active">
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            <div class="loading" id="loginLoading">
+                <div class="spinner"></div>
+                <p>Logging in...</p>
+            </div>
+            <button class="btn" onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
+            <div class="toggle-auth">
+                Don't have an account? <a onclick="toggleForm()">Register</a>
+            </div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" class="form-section">
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> First Name</label>
+                <input type="text" id="firstName" placeholder="Enter first name">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Last Name</label>
+                <input type="text" id="lastName" placeholder="Enter last name">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="registerEmail" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="registerPassword" placeholder="Enter password (min 6 chars)">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> Phone</label>
+                <input type="tel" id="phone" placeholder="Enter phone number">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-id-card"></i> SSN</label>
+                <input type="text" id="ssn" placeholder="Enter SSN">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Date of Birth</label>
+                <input type="date" id="dateOfBirth">
+            </div>
+            <div class="loading" id="registerLoading">
+                <div class="spinner"></div>
+                <p>Creating account...</p>
+            </div>
+            <button class="btn" onclick="handleRegister()"><i class="fas fa-user-plus"></i> Register</button>
+            <div class="toggle-auth">
+                Already have an account? <a onclick="toggleForm()">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        function toggleForm() {
+            document.getElementById('loginForm').classList.toggle('active');
+            document.getElementById('registerForm').classList.toggle('active');
+            clearAlert();
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showAlert('Please fill all fields', 'error');
+                return;
+            }
+
+            showLoading('loginLoading', true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    showAlert('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showAlert(error.message, 'error');
+            } finally {
+                showLoading('loginLoading', false);
+            }
+        }
+
+        async function handleRegister() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const phone = document.getElementById('phone').value;
+            const ssn = document.getElementById('ssn').value;
+            const dateOfBirth = document.getElementById('dateOfBirth').value;
+
+            if (!firstName || !lastName || !email || !password || !phone || !ssn || !dateOfBirth) {
+                showAlert('Please fill all fields', 'error');
+                return;
+            }
+
+            showLoading('registerLoading', true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName,
+                        lastName,
+                        email,
+                        password,
+                        phone,
+                        ssn,
+                        dateOfBirth
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    showAlert('Registration successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 1500);
+                } else {
+                    showAlert(data.message || data.errors?.[0]?.msg || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showAlert(error.message, 'error');
+            } finally {
+                showLoading('registerLoading', false);
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+        }
+
+        function clearAlert() {
+            document.getElementById('alert').className = 'alert';
+        }
+
+        function showLoading(elementId, show) {
+            document.getElementById(elementId).style.display = show ? 'block' : 'none';
+        }
+
+        // Redirect if already logged in
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                window.location.href = '/index.html';
+            }
+        });
+
+        // Enter key support
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (document.getElementById('loginForm').classList.contains('active')) {
+                    handleLogin();
+                } else {
+                    handleRegister();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
